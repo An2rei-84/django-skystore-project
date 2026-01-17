@@ -1,0 +1,5 @@
+<ul class="nav nav-pills">
+    <li class="nav-item"><a href="{% url 'catalog:home' %}" class="nav-link {% if request.path == '/' %}active{% endif %}">Главная</a></li>
+    <li class="nav-item"><a href="{% url 'catalog:contacts' %}" class="nav-link {% if request.path == '/contacts/' %}active{% endif %}">Контакты</a></li>
+    <li class="nav-item"><a href="{% url 'catalog:create_product' %}" class="nav-link {% if request.path == '/create/' %}active{% endif %}">Добавить продукт</a></li>
+</ul>
