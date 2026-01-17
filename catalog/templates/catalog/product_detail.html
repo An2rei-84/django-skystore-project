@@ -1,0 +1,21 @@
+{% extends 'catalog/base.html' %}
+
+{% block title %}
+    {{ title }}
+{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-md-6">
+            <img src="/media/{{ object.image }}" class="img-fluid" alt="{{ object.name }}">
+        </div>
+        <div class="col-md-6">
+            <h1>{{ object.name }}</h1>
+            <p class="text-muted">Категория: {{ object.category.name }}</p>
+            <p>{{ object.description }}</p>
+            <h2>{{ object.price }} руб.</h2>
+                            <p><small>Дата создания: {{ object.created_at|date:"d M Y, h:i a" }}</small></p>
+                            <p><small>Дата последнего изменения: {{ object.updated_at|date:"d M Y, h:i a" }}</small></p>             <a href="{% url 'catalog:home' %}" class="btn btn-primary">Назад к списку</a>
+        </div>
+    </div>
+{% endblock %}
