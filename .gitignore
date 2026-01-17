@@ -1,0 +1,15 @@
+# JetBrains IDEs
+.idea/
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.pyc
+
+# Environment variables
+.env
+
+# Databases
+*.sqlite3
+db.sqlite3

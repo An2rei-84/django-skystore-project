@@ -1,0 +1,52 @@
+{% extends 'catalog/base.html' %}
+
+{% block title %}
+    {{ title }}
+{% endblock %}
+
+{% block content %}
+    <div class="pricing-header p-3 pb-md-4 mx-auto text-center">
+        <h1 class="display-4 fw-normal text-body-emphasis">Каталог товаров</h1>
+        <p class="fs-5 text-body-secondary">Все, что нужно для вашего дома и даже больше</p>
+    </div>
+
+    <div class="row row-cols-1 row-cols-md-3 mb-3 text-center">
+        {% for object in page_obj %}
+        <div class="col">
+            <div class="card mb-4 rounded-3 shadow-sm">
+                <div class="card-header py-3">
+                    <h4 class="my-0 fw-normal">{{ object.name }}</h4>
+                </div>
+                <div class="card-body">
+                     <img src="/media/{{ object.image }}" class="img-fluid" alt="{{ object.name }}" style="max-height: 150px; object-fit: cover;">
+                    <p class="card-title pricing-card-title">{{ object.price }} руб.</p>
+                    <p>{{ object.description|truncatechars:100 }}</p>
+                    <a href="{% url 'catalog:product_detail' object.pk %}" class="w-100 btn btn-lg btn-outline-primary">Подробнее</a>
+                    <button type="button" class="w-100 btn btn-lg btn-primary mt-2">В корзину</button>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <nav aria-label="Page navigation example">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+                <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">Предыдущая</a></li>
+            {% endif %}
+
+            {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                    <li class="page-item active"><a class="page-link" href="#">{{ num }}</a></li>
+                {% else %}
+                    <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+                {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+                <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Следующая</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+{% endblock %}
+
