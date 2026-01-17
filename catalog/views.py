@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from django.core.paginator import Paginator
-from .models import Product, Contact
+from .models import Product, Contact, Feedback
 from .forms import ProductForm
 
 def home(request):
@@ -27,8 +27,8 @@ def contacts(request):
         name = request.POST.get('name')
         phone = request.POST.get('phone')
         message = request.POST.get('message')
-        print(f'Имя: {name}, Телефон: {phone}, Сообщение: {message}')
-    
+        Feedback.objects.create(name=name, phone=phone, message=message)
+
     context = {
         'contact_info': contact_info
     }
