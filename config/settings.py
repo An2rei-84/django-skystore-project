@@ -14,6 +14,8 @@ DEBUG = True
 ALLOWED_HOSTS = []
 
 
+# Список установленных приложений Django.
+# Для кастомных приложений используются полные пути к классам AppConfig для настройки verbose_name.
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -21,7 +23,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'catalog',
+    'catalog.apps.CatalogConfig', # Приложение каталога товаров
+    'blog.apps.BlogConfig',       # Приложение блога
 ]
 
 MIDDLEWARE = [
@@ -53,7 +56,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
-
+# Настройки базы данных. Проект настроен на использование PostgreSQL.
 DATABASES = {
     'default': {
         'ENGINE': os.getenv('DB_ENGINE', 'django.db.backends.postgresql'),
@@ -81,8 +84,9 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
-LANGUAGE_CODE = 'en-us'
+# Код языка для этого сайта. Это определяет, какой языковой пакет Django
+# будет загружен для этого приложения.
+LANGUAGE_CODE = 'ru'
 
 TIME_ZONE = 'UTC'
 
@@ -90,8 +94,13 @@ USE_I18N = True
 
 USE_TZ = True
 
-
+# URL, по которому обслуживаются статические файлы.
 STATIC_URL = 'static/'
+# Абсолютный путь к каталогу, где collectstatic будет собирать статические файлы для развертывания.
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+# URL, по которому обслуживаются медиа-файлы (загруженные пользователем).
 MEDIA_URL = '/media/'
+# Абсолютный путь к каталогу, где будут храниться загруженные медиа-файлы.
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
