@@ -19,10 +19,13 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 
+
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('', include('catalog.urls')),
+    path('admin/', admin.site.urls), # Маршруты административной панели Django
+    path('', include('catalog.urls')), # Включение URL-маршрутов приложения каталога
+    path('blogs/', include('blog.urls')), # Включение URL-маршрутов приложения блога
 ]
 
+# Добавление маршрутов для медиа-файлов в режиме отладки
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
