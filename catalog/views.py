@@ -1,7 +1,10 @@
-from django.shortcuts import render, redirect
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.paginator import Paginator
-from django.views.generic import ListView, DetailView, CreateView, FormView
-from django.urls import reverse_lazy
+from django.shortcuts import render
+from django.urls import reverse_lazy, reverse
+from django.views.generic import (
+    ListView, DetailView, CreateView, UpdateView, DeleteView, FormView
+)
 
 from .models import Product, Contact, Feedback
 from .forms import ProductForm, FeedbackForm
@@ -10,33 +13,44 @@ from .forms import ProductForm, FeedbackForm
 class ProductListView(ListView):
     """
     Представление для отображения списка продуктов с пагинацией.
-    Использует ListView для автоматической обработки списка объектов.
     """
     model = Product
     template_name = 'catalog/home.html'
     context_object_name = 'page_obj'
-    paginate_by = 3  # Показывать 3 товара на странице
+
+    def get_queryset(self):
+        """
+        Возвращает queryset продуктов, отсортированных по дате создания (сначала новые).
+        """
+        return Product.objects.order_by('-created_at')
 
     def get_context_data(self, **kwargs):
         """
-        Добавляет заголовок страницы в контекст.
+        Добавляет в контекст пагинацию и заголовок страницы.
         """
         context = super().get_context_data(**kwargs)
+        
+        # Ручная пагинация
+        paginator = Paginator(self.get_queryset(), 5) # 5 продуктов на страницу
+        page_number = self.request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
+        
+        context[self.context_object_name] = page_obj
         context['title'] = 'Skystore'
         return context
 
+
 class ContactFormView(FormView):
     """
-    Представление для отображения страницы контактов и обработки формы обратной связи.
-    Использует FormView для обработки POST-запросов и сохранения данных обратной связи.
+    Представление для страницы контактов и обработки формы обратной связи.
     """
     template_name = 'catalog/contacts.html'
     form_class = FeedbackForm
-    success_url = reverse_lazy('catalog:contacts') # URL для перенаправления после успешной отправки формы
+    success_url = reverse_lazy('catalog:contacts')
 
     def get_context_data(self, **kwargs):
         """
-        Добавляет контактную информацию в контекст.
+        Добавляет в контекст статическую контактную информацию.
         """
         context = super().get_context_data(**kwargs)
         context['contact_info'] = {
@@ -53,10 +67,10 @@ class ContactFormView(FormView):
         form.save()
         return super().form_valid(form)
 
-class ProductDetailView(DetailView):
+
+class ProductDetailView(LoginRequiredMixin, DetailView):
     """
-    Представление для отображения детальной информации об одном продукте.
-    Использует DetailView для автоматического извлечения объекта по его первичному ключу.
+    Представление для детального просмотра продукта.
     """
     model = Product
     template_name = 'catalog/product_detail.html'
@@ -64,26 +78,66 @@ class ProductDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         """
-        Добавляет заголовок страницы в контекст, используя имя продукта.
+        Добавляет в контекст заголовок страницы.
         """
         context = super().get_context_data(**kwargs)
         context['title'] = f'Skystore - {self.object.name}'
         return context
 
-class ProductCreateView(CreateView):
+
+class ProductCreateView(LoginRequiredMixin, CreateView):
     """
     Представление для создания нового продукта.
-    Использует CreateView для обработки формы создания объекта.
     """
     model = Product
     form_class = ProductForm
     template_name = 'catalog/product_form.html'
-    success_url = reverse_lazy('catalog:home') # URL для перенаправления после успешного создания продукта
+    success_url = reverse_lazy('catalog:home')
 
     def get_context_data(self, **kwargs):
         """
-        Добавляет заголовок страницы в контекст.
+        Добавляет в контекст заголовок страницы.
         """
         context = super().get_context_data(**kwargs)
         context['title'] = 'Добавить продукт'
+        return context
+
+
+class ProductUpdateView(LoginRequiredMixin, UpdateView):
+    """
+    Представление для редактирования продукта.
+    """
+    model = Product
+    form_class = ProductForm
+    template_name = 'catalog/product_form.html'
+
+    def get_success_url(self):
+        """
+        Возвращает URL для перенаправления после успешного обновления продукта.
+        """
+        return reverse('catalog:product_detail', args=[self.kwargs.get('pk')])
+
+    def get_context_data(self, **kwargs):
+        """
+        Добавляет в контекст заголовок страницы.
+        """
+        context = super().get_context_data(**kwargs)
+        context['title'] = f'Редактировать {self.object.name}'
+        return context
+
+
+class ProductDeleteView(LoginRequiredMixin, DeleteView):
+    """
+    Представление для удаления продукта.
+    """
+    model = Product
+    template_name = 'catalog/product_confirm_delete.html'
+    success_url = reverse_lazy('catalog:home')
+
+    def get_context_data(self, **kwargs):
+        """
+        Добавляет в контекст заголовок страницы.
+        """
+        context = super().get_context_data(**kwargs)
+        context['title'] = f'Удалить {self.object.name}'
         return context

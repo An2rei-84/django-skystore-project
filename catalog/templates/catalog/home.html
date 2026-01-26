@@ -8,6 +8,7 @@
     <div class="pricing-header p-3 pb-md-4 mx-auto text-center">
         <h1 class="display-4 fw-normal text-body-emphasis">Каталог товаров</h1>
         <p class="fs-5 text-body-secondary">Все, что нужно для вашего дома и даже больше</p>
+        <a href="{% url 'catalog:create_product' %}" class="btn btn-primary my-3">Добавить новый продукт</a>
     </div>
 
     <div class="row row-cols-1 row-cols-md-3 mb-3 text-center">
@@ -18,7 +19,7 @@
                     <h4 class="my-0 fw-normal">{{ object.name }}</h4>
                 </div>
                 <div class="card-body">
-                     <img src="/media/{{ object.image }}" class="img-fluid" alt="{{ object.name }}" style="max-height: 150px; object-fit: cover;">
+                     <img src="{{ object.image.url }}" class="img-fluid" alt="{{ object.name }}" style="max-height: 150px; object-fit: cover;">
                     <p class="card-title pricing-card-title">{{ object.price }} руб.</p>
                     <p>{{ object.description|truncatechars:100 }}</p>
                     <a href="{% url 'catalog:product_detail' object.pk %}" class="w-100 btn btn-lg btn-outline-primary">Подробнее</a>
@@ -49,4 +50,3 @@
         </ul>
     </nav>
 {% endblock %}
-
