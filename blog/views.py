@@ -1,4 +1,5 @@
 from django.urls import reverse_lazy
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.core.mail import send_mail
 from slugify import slugify as slugify_lib # Используем slugify из python-slugify
@@ -62,15 +63,17 @@ class BlogDetailView(DetailView):
             # EMAIL_HOST_PASSWORD = 'your_app_password' # Используйте пароль приложения, не пароль от аккаунта Google
         return self.object
 
-class BlogCreateView(CreateView):
+class BlogCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     """
     Представление для создания новой статьи блога.
     Автоматически генерирует slug из заголовка или транслитерирует введенный пользователем slug.
+    Доступно только для пользователей с правом на добавление статей.
     """
     model = Blog
     form_class = BlogForm
     template_name = 'blog/blog_form.html'
     success_url = reverse_lazy('blog:list')
+    permission_required = 'blog.add_blog'
 
     def form_valid(self, form):
         """
@@ -85,14 +88,16 @@ class BlogCreateView(CreateView):
         print(f"DEBUG: Slug before saving: '{form.instance.slug}' (type: {type(form.instance.slug)})") # Отладочный вывод
         return super().form_valid(form)
 
-class BlogUpdateView(UpdateView):
+class BlogUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     """
     Представление для редактирования существующей статьи блога.
     Автоматически транслитерирует введенный пользователем slug, если он изменен.
+    Доступно только для пользователей с правом на изменение статей.
     """
     model = Blog
     form_class = BlogForm
     template_name = 'blog/blog_form.html'
+    permission_required = 'blog.change_blog'
 
     def form_valid(self, form):
         """
@@ -114,10 +119,12 @@ class BlogUpdateView(UpdateView):
         """
         return reverse_lazy('blog:detail', kwargs={'slug': self.object.slug})
 
-class BlogDeleteView(DeleteView):
+class BlogDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
     """
     Представление для удаления статьи блога.
+    Доступно только для пользователей с правом на удаление статей.
     """
     model = Blog
     template_name = 'blog/blog_confirm_delete.html'
-    success_url = reverse_lazy('blog:list') # URL для перенаправления после успешного удаления статьи
+    success_url = reverse_lazy('blog:list')
+    permission_required = 'blog.delete_blog'
