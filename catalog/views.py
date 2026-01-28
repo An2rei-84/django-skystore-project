@@ -1,6 +1,7 @@
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.decorators import login_required, permission_required
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.core.paginator import Paginator
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy, reverse
 from django.views.generic import (
     ListView, DetailView, CreateView, UpdateView, DeleteView, FormView
@@ -20,9 +21,9 @@ class ProductListView(ListView):
 
     def get_queryset(self):
         """
-        Возвращает queryset продуктов, отсортированных по дате создания (сначала новые).
+        Возвращает queryset опубликованных продуктов, отсортированных по дате создания.
         """
-        return Product.objects.order_by('-created_at')
+        return Product.objects.filter(is_published=True).order_by('-created_at')
 
     def get_context_data(self, **kwargs):
         """
@@ -30,8 +31,7 @@ class ProductListView(ListView):
         """
         context = super().get_context_data(**kwargs)
         
-        # Ручная пагинация
-        paginator = Paginator(self.get_queryset(), 5) # 5 продуктов на страницу
+        paginator = Paginator(self.get_queryset(), 5)
         page_number = self.request.GET.get('page')
         page_obj = paginator.get_page(page_number)
         
@@ -88,11 +88,21 @@ class ProductDetailView(LoginRequiredMixin, DetailView):
 class ProductCreateView(LoginRequiredMixin, CreateView):
     """
     Представление для создания нового продукта.
+    Автоматически назначает текущего пользователя владельцем продукта.
     """
     model = Product
     form_class = ProductForm
     template_name = 'catalog/product_form.html'
     success_url = reverse_lazy('catalog:home')
+
+    def form_valid(self, form):
+        """
+        Присваивает текущего пользователя как владельца продукта перед сохранением.
+        """
+        self.object = form.save()
+        self.object.owner = self.request.user
+        self.object.save()
+        return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
         """
@@ -103,13 +113,20 @@ class ProductCreateView(LoginRequiredMixin, CreateView):
         return context
 
 
-class ProductUpdateView(LoginRequiredMixin, UpdateView):
+class ProductUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     """
     Представление для редактирования продукта.
+    Доступно только для владельца продукта.
     """
     model = Product
     form_class = ProductForm
     template_name = 'catalog/product_form.html'
+
+    def test_func(self):
+        """
+        Проверяет, является ли текущий пользователь владельцем продукта.
+        """
+        return self.request.user == self.get_object().owner
 
     def get_success_url(self):
         """
@@ -126,13 +143,23 @@ class ProductUpdateView(LoginRequiredMixin, UpdateView):
         return context
 
 
-class ProductDeleteView(LoginRequiredMixin, DeleteView):
+class ProductDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     """
     Представление для удаления продукта.
+    Доступно для владельца или модератора.
     """
     model = Product
     template_name = 'catalog/product_confirm_delete.html'
     success_url = reverse_lazy('catalog:home')
+
+    def test_func(self):
+        """
+        Проверяет, является ли пользователь владельцем продукта или имеет право на удаление.
+        """
+        product = self.get_object()
+        is_owner = self.request.user == product.owner
+        can_delete = self.request.user.has_perm('catalog.delete_product')
+        return is_owner or can_delete
 
     def get_context_data(self, **kwargs):
         """
@@ -141,3 +168,16 @@ class ProductDeleteView(LoginRequiredMixin, DeleteView):
         context = super().get_context_data(**kwargs)
         context['title'] = f'Удалить {self.object.name}'
         return context
+
+
+@login_required
+@permission_required('catalog.can_unpublish_product')
+def unpublish_product(request, pk):
+    """
+    Контроллер для отмены публикации продукта.
+    Доступен только для пользователей с правом 'can_unpublish_product'.
+    """
+    product = get_object_or_404(Product, pk=pk)
+    product.is_published = False
+    product.save()
+    return redirect('catalog:product_detail', pk=pk)

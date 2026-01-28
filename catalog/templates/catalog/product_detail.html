@@ -18,8 +18,18 @@
             <p><small>Дата последнего изменения: {{ object.updated_at|date:"d M Y, H:i" }}</small></p>
 
             <div class="mt-3">
-                <a href="{% url 'catalog:update_product' pk=object.pk %}" class="btn btn-warning">Редактировать</a>
-                <a href="{% url 'catalog:delete_product' pk=object.pk %}" class="btn btn-danger">Удалить</a>
+                {% if user == object.owner %}
+                    <a href="{% url 'catalog:update_product' pk=object.pk %}" class="btn btn-warning">Редактировать</a>
+                {% endif %}
+
+                {% if user == object.owner or perms.catalog.delete_product %}
+                    <a href="{% url 'catalog:delete_product' pk=object.pk %}" class="btn btn-danger">Удалить</a>
+                {% endif %}
+                
+                {% if perms.catalog.can_unpublish_product and object.is_published %}
+                    <a href="{% url 'catalog:unpublish_product' pk=object.pk %}" class="btn btn-secondary">Снять с публикации</a>
+                {% endif %}
+                
                 <a href="{% url 'catalog:home' %}" class="btn btn-primary">Назад к списку</a>
             </div>
         </div>
