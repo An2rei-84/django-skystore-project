@@ -8,7 +8,7 @@
     <ul class="nav nav-pills justify-content-end align-items-center">
         {% if user.is_authenticated %}
                             <li class="nav-item">
-                                <a href="#" class="nav-link text-truncate" title="{{ user.email }}" style="max-width: 150px;">
+                                <a href="{% url 'users:profile' %}" class="nav-link text-truncate" title="{{ user.email }}" style="max-width: 150px;">
                                     Привет, {{ user.email }}
                                 </a>
                             </li>            <li class="nav-item">
