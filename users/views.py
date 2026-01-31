@@ -1,8 +1,9 @@
 from django.urls import reverse_lazy
-from django.views.generic import CreateView
+from django.views.generic import CreateView, UpdateView
 from users.forms import UserRegisterForm
 from users.models import User
 from django.core.mail import send_mail
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 
 class UserRegisterView(CreateView):
@@ -20,3 +21,13 @@ class UserRegisterView(CreateView):
             recipient_list=[user.email]
         )
         return super().form_valid(form)
+
+
+class ProfileView(LoginRequiredMixin, UpdateView):
+    model = User
+    form_class = UserRegisterForm
+    template_name = 'users/profile.html'
+    success_url = reverse_lazy('users:profile')
+
+    def get_object(self, queryset=None):
+        return self.request.user
