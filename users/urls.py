@@ -1,6 +1,6 @@
 from django.urls import path
 from users.apps import UsersConfig
-from users.views import UserRegisterView
+from users.views import UserRegisterView, ProfileView
 from django.contrib.auth.views import LoginView, LogoutView
 from .forms import CustomAuthenticationForm
 
@@ -13,4 +13,5 @@ urlpatterns = [
         authentication_form=CustomAuthenticationForm
     ), name='login'),
     path('logout/', LogoutView.as_view(), name='logout'),
+    path('profile/', ProfileView.as_view(), name='profile'),
 ]

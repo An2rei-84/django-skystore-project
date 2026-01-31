@@ -1,3 +1,5 @@
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.core.paginator import Paginator
@@ -7,8 +9,9 @@ from django.views.generic import (
     ListView, DetailView, CreateView, UpdateView, DeleteView, FormView
 )
 
-from .models import Product, Contact, Feedback
+from .models import Product, Contact, Feedback, Category
 from .forms import ProductForm, FeedbackForm
+from .services import get_products_by_category
 
 
 class ProductListView(ListView):
@@ -67,10 +70,11 @@ class ContactFormView(FormView):
         form.save()
         return super().form_valid(form)
 
-
+@method_decorator(cache_page(60 * 15), name='dispatch')
 class ProductDetailView(LoginRequiredMixin, DetailView):
     """
     Представление для детального просмотра продукта.
+    Кешируется на 15 минут.
     """
     model = Product
     template_name = 'catalog/product_detail.html'
@@ -181,3 +185,31 @@ def unpublish_product(request, pk):
     product.is_published = False
     product.save()
     return redirect('catalog:product_detail', pk=pk)
+
+
+class CategoryProductListView(ListView):
+    """
+    Представление для отображения списка продуктов в конкретной категории.
+    """
+    model = Product
+    template_name = 'catalog/category_products.html'
+    context_object_name = 'products'
+
+    def get_queryset(self):
+        """
+        Возвращает queryset продуктов для указанной в URL категории.
+        """
+        category_pk = self.kwargs.get('pk')
+        _, products = get_products_by_category(category_pk=category_pk)
+        return products
+
+    def get_context_data(self, **kwargs):
+        """
+        Добавляет в контекст объект категории для использования в шаблоне.
+        """
+        context = super().get_context_data(**kwargs)
+        category_pk = self.kwargs.get('pk')
+        category, _ = get_products_by_category(category_pk=category_pk)
+        context['title'] = f'Продукты категории: {category.name}'
+        context['category'] = category
+        return context

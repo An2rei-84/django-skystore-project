@@ -1,0 +1,39 @@
+{% extends 'catalog/base.html' %}
+
+{% block title %}
+    {{ title }}
+{% endblock %}
+
+{% block content %}
+    <div class="pricing-header p-3 pb-md-4 mx-auto text-center">
+        <h1 class="display-4 fw-normal text-body-emphasis">Продукты категории: {{ category.name }}</h1>
+        <p class="fs-5 text-body-secondary">{{ category.description }}</p>
+    </div>
+
+    <div class="row row-cols-1 row-cols-md-3 mb-3 text-center">
+        {% for object in products %}
+        <div class="col">
+            <div class="card mb-4 rounded-3 shadow-sm">
+                <div class="card-header py-3">
+                    <h4 class="my-0 fw-normal">{{ object.name }}</h4>
+                </div>
+                <div class="card-body">
+                     <img src="{{ object.image.url }}" class="img-fluid" alt="{{ object.name }}" style="max-height: 150px; object-fit: cover;">
+                    <p class="card-title pricing-card-title">{{ object.price }} руб.</p>
+                    <p>{{ object.description|truncatechars:100 }}</p>
+                    <a href="{% url 'catalog:product_detail' object.pk %}" class="w-100 btn btn-lg btn-outline-primary">Подробнее</a>
+                    <button type="button" class="w-100 btn btn-lg btn-primary mt-2">В корзину</button>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <p class="fs-5 text-body-secondary">В этой категории пока нет продуктов.</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="text-center">
+        <a href="{% url 'catalog:home' %}" class="btn btn-secondary">Назад к каталогу</a>
+    </div>
+{% endblock %}
