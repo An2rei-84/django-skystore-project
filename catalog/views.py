@@ -1,15 +1,13 @@
-from django.utils.decorators import method_decorator
-from django.views.decorators.cache import cache_page
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.core.paginator import Paginator
-from django.shortcuts import render, get_object_or_404, redirect
+from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy, reverse
 from django.views.generic import (
     ListView, DetailView, CreateView, UpdateView, DeleteView, FormView
 )
 
-from .models import Product, Contact, Feedback, Category
+from .models import Product
 from .forms import ProductForm, FeedbackForm
 from .services import get_products_by_category
 
@@ -70,11 +68,10 @@ class ContactFormView(FormView):
         form.save()
         return super().form_valid(form)
 
-@method_decorator(cache_page(60 * 15), name='dispatch')
+
 class ProductDetailView(LoginRequiredMixin, DetailView):
     """
     Представление для детального просмотра продукта.
-    Кешируется на 15 минут.
     """
     model = Product
     template_name = 'catalog/product_detail.html'
@@ -84,7 +81,7 @@ class ProductDetailView(LoginRequiredMixin, DetailView):
         """
         Добавляет в контекст заголовок страницы.
         """
-        context = super().get_context_data(**kwargs)
+        context = super().get_Gget_context_data(**kwargs)
         context['title'] = f'Skystore - {self.object.name}'
         return context
 
