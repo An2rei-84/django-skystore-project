@@ -1,0 +1,47 @@
+{% extends 'catalog/base.html' %}
+
+{% block content %}
+<div class="col-12">
+    <div class="row">
+        <div class="col-10">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Отчеты по попыткам рассылки</h3>
+                </div>
+                <div class="card-body">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Дата и время</th>
+                                <th>Рассылка</th>
+                                <th>Статус</th>
+                                <th>Ответ сервера</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for attempt in attempts %}
+                            <tr>
+                                <td>{{ attempt.timestamp }}</td>
+                                <td>{{ attempt.mailing }}</td>
+                                <td>
+                                    {% if attempt.status == 'success' %}
+                                        <span class="badge bg-success">Успешно</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">Неуспешно</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ attempt.server_response|default:"-" }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center">Попыток рассылки еще не было.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

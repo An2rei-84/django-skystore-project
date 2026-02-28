@@ -1,0 +1,28 @@
+{% extends 'catalog/base.html' %}
+
+{% block content %}
+<div class="col-12">
+    <div class="row">
+        <div class="col-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Детали клиента</h3>
+                </div>
+                <div class="card-body">
+                    <p><strong>Email:</strong> {{ client.email }}</p>
+                    <p><strong>Имя:</strong> {{ client.first_name }}</p>
+                    <p><strong>Фамилия:</strong> {{ client.last_name }}</p>
+                    <p><strong>Комментарий:</strong> {{ client.comment }}</p>
+                    {% if user == client.owner or perms.mailings.change_any_client %}
+                    <a href="{% url 'mailings:client_update' client.pk %}" class="btn btn-warning">Изменить</a>
+                    {% endif %}
+                    {% if user == client.owner or perms.mailings.delete_any_client %}
+                    <a href="{% url 'mailings:client_delete' client.pk %}" class="btn btn-danger">Удалить</a>
+                    {% endif %}
+                    <a href="{% url 'mailings:client_list' %}" class="btn btn-secondary">Назад к списку</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

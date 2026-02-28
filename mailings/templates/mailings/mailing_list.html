@@ -1,0 +1,50 @@
+{% extends 'catalog/base.html' %}
+
+{% block content %}
+<div class="col-12">
+    <div class="row">
+        <div class="col-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Список рассылок</h3>
+                </div>
+                <div class="card-body">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Начало</th>
+                                <th>Окончание</th>
+                                <th>Периодичность</th>
+                                <th>Статус</th>
+                                <th>Действия</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for mailing in mailings %}
+                            <tr>
+                                <td>{{ mailing.start_time }}</td>
+                                <td>{{ mailing.end_time }}</td>
+                                <td>{{ mailing.get_frequency_display }}</td>
+                                <td>{{ mailing.get_status_display }}</td>
+                                <td>
+                                    <a href="{% url 'mailings:mailing_detail' mailing.pk %}" class="btn btn-info">Просмотр</a>
+                                    {% if user == mailing.owner or perms.mailings.change_any_mailing %}
+                                    <a href="{% url 'mailings:mailing_update' mailing.pk %}" class="btn btn-warning">Изменить</a>
+                                    {% endif %}
+                                    {% if user == mailing.owner or perms.mailings.delete_any_mailing %}
+                                    <a href="{% url 'mailings:mailing_delete' mailing.pk %}" class="btn btn-danger">Удалить</a>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="card-footer">
+                    <a href="{% url 'mailings:mailing_create' %}" class="btn btn-primary">Создать рассылку</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -12,15 +12,14 @@ class CustomUserCreationForm(UserCreationForm):
     """Кастомная форма создания пользователя для админки."""
     class Meta(UserCreationForm.Meta):
         model = User
-        fields = ('email', 'password1', 'password2') # ИСПРАВЛЕНО! Использование password1 и password2
-
+        fields = ('email', 'password1', 'password2')  # ИСПРАВЛЕНО! Использование password1 и password2
 
 
 class CustomUserChangeForm(UserChangeForm):
     """Кастомная форма изменения пользователя для админки."""
     class Meta:
         model = User
-        fields = '__all__' # Исправлено: используем все поля, видимость контролируется через Admin
+        fields = '__all__'  # Исправлено: используем все поля, видимость контролируется через Admin
 
 
 class CustomAuthenticationForm(AuthenticationForm):

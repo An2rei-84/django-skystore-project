@@ -23,3 +23,8 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.flake8]
 max-line-length = 119
+
+[dependency-groups]
+dev = [
+    "flake8 (>=7.3.0,<8.0.0)"
+]

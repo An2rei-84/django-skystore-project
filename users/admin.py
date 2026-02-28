@@ -3,6 +3,7 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from .models import User
 from .forms import CustomUserCreationForm, CustomUserChangeForm
 
+
 @admin.register(User)
 class UserAdmin(BaseUserAdmin):
     """
@@ -29,6 +30,6 @@ class UserAdmin(BaseUserAdmin):
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ('email', 'password1', 'password2'), # ИСПРАВЛЕНО!
+            'fields': ('email', 'password1', 'password2'),  # ИСПРАВЛЕНО!
         }),
     )

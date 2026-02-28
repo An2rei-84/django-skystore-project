@@ -21,10 +21,11 @@ from django.conf.urls.static import static
 
 
 urlpatterns = [
-    path('admin/', admin.site.urls), # Маршруты административной панели Django
-    path('', include('catalog.urls')), # Включение URL-маршрутов приложения каталога
-    path('blogs/', include('blog.urls')), # Включение URL-маршрутов приложения блога
-    path('users/', include('users.urls', namespace='users')), # Включение URL-маршрутов приложения пользователей
+    path('admin/', admin.site.urls),  # Маршруты административной панели Django
+    path('', include('catalog.urls')),  # Включение URL-маршрутов приложения каталога
+    path('blogs/', include('blog.urls')),  # Включение URL-маршрутов приложения блога
+    path('mailings/', include('mailings.urls', namespace='mailings')),
+    path('users/', include('users.urls', namespace='users')),  # Включение URL-маршрутов приложения пользователей
 ]
 
 # Добавление маршрутов для медиа-файлов в режиме отладки

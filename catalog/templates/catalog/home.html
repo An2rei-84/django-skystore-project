@@ -23,7 +23,7 @@
                     <p class="card-title pricing-card-title">{{ object.price }} руб.</p>
                     <p>{{ object.description|truncatechars:100 }}</p>
                     <a href="{% url 'catalog:product_detail' object.pk %}" class="w-100 btn btn-lg btn-outline-primary">Подробнее</a>
-                    <button type="button" class="w-100 btn btn-lg btn-primary mt-2">В корзину</button>
+
                 </div>
             </div>
         </div>

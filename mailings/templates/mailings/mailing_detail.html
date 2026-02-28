@@ -1,0 +1,42 @@
+{% extends 'catalog/base.html' %}
+
+{% block content %}
+<div class="col-12">
+    <div class="row">
+        <div class="col-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Детали рассылки</h3>
+                </div>
+                <div class="card-body">
+                    <p><strong>Время начала:</strong> {{ mailing.start_time }}</p>
+                    <p><strong>Время окончания:</strong> {{ mailing.end_time }}</p>
+                    <p><strong>Периодичность:</strong> {{ mailing.get_frequency_display }}</p>
+                    <p><strong>Статус:</strong> {{ mailing.get_status_display }}</p>
+                    <p><strong>Владелец:</strong> {{ mailing.owner.email }}</p>
+
+                    {% if user == mailing.owner or perms.mailings.can_set_mailing_status %}
+                        {% if mailing.status == 'created' or mailing.status == 'paused' %}
+                            <a href="{% url 'mailings:set_mailing_status' mailing.pk 'started' %}" class="btn btn-success">Запустить</a>
+                        {% endif %}
+                        {% if mailing.status == 'started' %}
+                            <a href="{% url 'mailings:set_mailing_status' mailing.pk 'paused' %}" class="btn btn-secondary">Приостановить</a>
+                        {% endif %}
+                         {% if mailing.status != 'completed' %}
+                            <a href="{% url 'mailings:set_mailing_status' mailing.pk 'completed' %}" class="btn btn-dark">Завершить</a>
+                        {% endif %}
+                    {% endif %}
+
+                    {% if user == mailing.owner or perms.mailings.change_any_mailing %}
+                    <a href="{% url 'mailings:mailing_update' mailing.pk %}" class="btn btn-warning">Изменить</a>
+                    {% endif %}
+                    {% if user == mailing.owner or perms.mailings.delete_any_mailing %}
+                    <a href="{% url 'mailings:mailing_delete' mailing.pk %}" class="btn btn-danger">Удалить</a>
+                    {% endif %}
+                    <a href="{% url 'mailings:mailing_list' %}" class="btn btn-secondary">Назад к списку</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -2,6 +2,7 @@ from django.core.management import call_command
 from django.core.management.base import BaseCommand
 from catalog.models import Product, Category
 
+
 class Command(BaseCommand):
     help = 'Deletes all data from Product and Category tables and loads new data from fixtures.'
 

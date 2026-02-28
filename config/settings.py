@@ -7,7 +7,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-g&7jt_m8&@w^!x(+cd^r12whi1#h3vh&(4l1&43mz7&2y^exz!')
 
-DEBUG = True
+DEBUG = os.getenv('DEBUG', 'False').lower() in ('true', '1', 't')
 
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 
@@ -22,8 +22,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'users.apps.UsersConfig',
-    'catalog.apps.CatalogConfig', # Приложение каталога товаров
-    'blog.apps.BlogConfig',       # Приложение блога
+    'catalog.apps.CatalogConfig',  # Приложение каталога товаров
+    'blog.apps.BlogConfig',        # Приложение блога
+    'mailings.apps.MailingsConfig',
 ]
 
 MIDDLEWARE = [
@@ -106,7 +107,14 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 AUTH_USER_MODEL = 'users.User'
 
 # Настройки для отправки писем
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = os.getenv('EMAIL_HOST')
+EMAIL_PORT = os.getenv('EMAIL_PORT')
+EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS') == 'True'
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL')
+
 
 LOGIN_URL = 'users:login'
 LOGIN_REDIRECT_URL = 'catalog:home'
@@ -114,14 +122,23 @@ LOGOUT_REDIRECT_URL = 'catalog:home'
 
 # Caching settings
 CACHE_ENABLED = os.getenv('CACHE_ENABLED', 'True').lower() in ('true', '1', 't')
+CACHE_BACKEND = os.getenv('CACHE_BACKEND', 'locmem')
 
 if CACHE_ENABLED:
-    CACHES = {
-        "default": {
-            "BACKEND": "django_redis.cache.RedisCache",
-            "LOCATION": "redis://127.0.0.1:6379/1",
-            "OPTIONS": {
-                "CLIENT_CLASS": "django_redis.client.DefaultClient",
+    if CACHE_BACKEND == 'redis':
+        CACHES = {
+            "default": {
+                "BACKEND": "django_redis.cache.RedisCache",
+                "LOCATION": os.getenv('REDIS_LOCATION', 'redis://127.0.0.1:6379/1'),
+                "OPTIONS": {
+                    "CLIENT_CLASS": "django_redis.client.DefaultClient",
+                }
             }
         }
-    }
+    else:
+        CACHES = {
+            'default': {
+                'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+                'LOCATION': 'unique-snowflake',
+            }
+        }
