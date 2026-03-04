@@ -1,6 +1,6 @@
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, UpdateView
-from users.forms import UserRegisterForm
+from users.forms import UserRegisterForm, CustomUserChangeForm  # Import CustomUserChangeForm
 from users.models import User
 from django.core.mail import send_mail
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -25,7 +25,7 @@ class UserRegisterView(CreateView):
 
 class ProfileView(LoginRequiredMixin, UpdateView):
     model = User
-    form_class = UserRegisterForm
+    form_class = CustomUserChangeForm  # Use CustomUserChangeForm
     template_name = 'users/profile.html'
     success_url = reverse_lazy('users:profile')
 

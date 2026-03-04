@@ -2,10 +2,12 @@ from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.core.mail import send_mail
-from slugify import slugify as slugify_lib # Используем slugify из python-slugify
+from django.conf import settings  # Import settings
+from slugify import slugify as slugify_lib  # Используем slugify из python-slugify
 
 from .models import Blog
 from .forms import BlogForm
+
 
 class BlogListView(ListView):
     """
@@ -23,6 +25,7 @@ class BlogListView(ListView):
         queryset = super().get_queryset(*args, **kwargs)
         queryset = queryset.filter(is_published=True)  # Фильтрация по опубликованным статьям
         return queryset
+
 
 class BlogDetailView(DetailView):
     """
@@ -45,23 +48,15 @@ class BlogDetailView(DetailView):
         if self.object.views_count == 100:
             subject = f"Поздравляем! Статья '{self.object.title}' достигла 100 просмотров!"
             message = f"Ваша статья '{self.object.title}' только что достигла 100 просмотров на сайте."
-            from_email = 'your_email@example.com'  # Замените на свой email
-            recipient_list = ['your_email@example.com']  # Замените на свой email
+            from_email = settings.DEFAULT_FROM_EMAIL
+            recipient_list = [settings.DEFAULT_FROM_EMAIL]  # Or retrieve from a setting like ADMIN_EMAIL
             try:
                 send_mail(subject, message, from_email, recipient_list, fail_silently=False)
                 print(f"Email отправлен: '{self.object.title}' достигла 100 просмотров.")
             except Exception as e:
                 print(f"Ошибка при отправке email: {e}")
-            # Для корректной работы отправки email необходимо настроить параметры EMAIL_BACKEND, EMAIL_HOST,
-            # EMAIL_PORT, EMAIL_HOST_USER, EMAIL_HOST_PASSWORD в файле settings.py.
-            # Пример настройки для Gmail:
-            # EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-            # EMAIL_HOST = 'smtp.gmail.com'
-            # EMAIL_PORT = 587
-            # EMAIL_USE_TLS = True
-            # EMAIL_HOST_USER = 'your_email@gmail.com'
-            # EMAIL_HOST_PASSWORD = 'your_app_password' # Используйте пароль приложения, не пароль от аккаунта Google
         return self.object
+
 
 class BlogCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     """
@@ -85,8 +80,9 @@ class BlogCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
         else:
             # Если пользователь предоставил slug, транслитерируем его для обеспечения ASCII-совместимости
             form.instance.slug = slugify_lib(form.instance.slug)
-        print(f"DEBUG: Slug before saving: '{form.instance.slug}' (type: {type(form.instance.slug)})") # Отладочный вывод
+        print(f"DEBUG: Slug before saving: '{form.instance.slug}' (type: {type(form.instance.slug)})")  # Отладочный вывод
         return super().form_valid(form)
+
 
 class BlogUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     """
@@ -109,7 +105,7 @@ class BlogUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
         else:
             # Если пользователь предоставил slug, транслитерируем его для обеспечения ASCII-совместимости
             form.instance.slug = slugify_lib(form.instance.slug)
-        print(f"DEBUG: Slug before saving: '{form.instance.slug}' (type: {type(form.instance.slug)})") # Отладочный вывод
+        print(f"DEBUG: Slug before saving: '{form.instance.slug}' (type: {type(form.instance.slug)})")  # Отладочный вывод
         return super().form_valid(form)
 
     def get_success_url(self):
@@ -118,6 +114,7 @@ class BlogUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
         Перенаправляет на страницу детального просмотра отредактированной статьи.
         """
         return reverse_lazy('blog:detail', kwargs={'slug': self.object.slug})
+
 
 class BlogDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
     """

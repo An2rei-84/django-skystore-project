@@ -31,11 +31,9 @@ class ProductListView(ListView):
         Добавляет в контекст пагинацию и заголовок страницы.
         """
         context = super().get_context_data(**kwargs)
-        
         paginator = Paginator(self.get_queryset(), 5)
         page_number = self.request.GET.get('page')
         page_obj = paginator.get_page(page_number)
-        
         context[self.context_object_name] = page_obj
         context['title'] = 'Skystore'
         return context
@@ -81,7 +79,7 @@ class ProductDetailView(LoginRequiredMixin, DetailView):
         """
         Добавляет в контекст заголовок страницы.
         """
-        context = super().get_Gget_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context['title'] = f'Skystore - {self.object.name}'
         return context
 
